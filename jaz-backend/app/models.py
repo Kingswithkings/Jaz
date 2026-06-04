@@ -181,3 +181,44 @@ class QuizSession(Base):
     score = Column(Integer, default=0)
     stars_earned = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class ParentSafetySetting(Base):
+    __tablename__ = "parent_safety_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    parent_id = Column(Integer, ForeignKey("parents.id"))
+    child_id = Column(Integer, ForeignKey("children.id"))
+
+    daily_screen_time_limit_minutes = Column(Integer, default=120)
+    child_safe_mode = Column(String, default="strict")  # strict, balanced
+    internet_monitoring_enabled = Column(String, default="yes")
+    ai_chat_monitoring_enabled = Column(String, default="yes")
+
+    blocked_categories = Column(Text, default="adult,violence,gambling,drugs,stranger_chat")
+    allowed_categories = Column(Text, default="education,creativity,bible,science,maths,reading")
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class LearningGoal(Base):
+    __tablename__ = "learning_goals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    child_id = Column(Integer, ForeignKey("children.id"))
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    category = Column(String, default="general")
+    target_stars = Column(Integer, default=50)
+    current_stars = Column(Integer, default=0)
+    status = Column(String, default="active")  # active, completed
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class LearningPath(Base):
+    __tablename__ = "learning_paths"
+
+    id = Column(Integer, primary_key=True, index=True)
+    child_id = Column(Integer, ForeignKey("children.id"))
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    path_content = Column(Text, nullable=False)
+    status = Column(String, default="active")
+    created_at = Column(DateTime, default=datetime.utcnow)

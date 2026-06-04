@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import create_tables
-from app.routers import auth, children, ai, parent_dashboard, feed, social, internet, communities, creativity, homework, quiz
+from app.routers import auth, children, ai, parent_dashboard, feed, social, internet, communities, creativity, homework, quiz, safety, goals, learning_path
 create_tables()
 
 app = FastAPI(
@@ -30,6 +30,9 @@ app.include_router(communities.router, prefix="/communities", tags=["Safe Commun
 app.include_router(creativity.router, prefix="/creativity", tags=["Creativity Studio"])
 app.include_router(homework.router, prefix="/homework", tags=["Homework Helper"])
 app.include_router(quiz.router, prefix="/quiz", tags=["AI Quiz Generator"])
+app.include_router(safety.router, prefix="/safety", tags=["Parent Safety Controls"])
+app.include_router(goals.router, prefix="/goals", tags=["Learning Goals"])
+app.include_router(learning_path.router, prefix="/learning-path", tags=["AI Learning Path"])
 
 @app.get("/")
 def home():

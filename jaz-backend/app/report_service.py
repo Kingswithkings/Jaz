@@ -236,3 +236,55 @@ JAZ — Building Joyful and Wise Generations.
         raise RuntimeError(f"SMTP email delivery failed: {exc}") from exc
 
     return True
+
+def send_parent_safety_alert(
+    parent_email: str,
+    parent_name: str,
+    child_name: str,
+    website_or_app: str,
+    url: str | None,
+    category: str,
+    summary: str | None
+):
+    smtp_host = os.getenv("SMTP_HOST")
+    smtp_port = int(os.getenv("SMTP_PORT", 587))
+    smtp_email = os.getenv("SMTP_EMAIL")
+    smtp_password = os.getenv("SMTP_PASSWORD")
+
+    if not all([smtp_host, smtp_email, smtp_password]):
+        return False
+
+    msg = EmailMessage()
+    msg["Subject"] = f"JAZ Safety Alert for {child_name}"
+    msg["From"] = smtp_email
+    msg["To"] = parent_email
+
+    msg.set_content(
+        f"""
+Hello {parent_name},
+
+JAZ has detected a potentially unsafe internet activity for {child_name}.
+
+Activity details:
+
+Website/App: {website_or_app}
+URL: {url or "Not provided"}
+Category: {category}
+Summary: {summary or "No summary provided"}
+
+Recommended action:
+Please review this activity in your JAZ Parent Dashboard.
+
+JAZ — Building Joyful and Wise Generations.
+"""
+    )
+
+    try:
+        with smtplib.SMTP(smtp_host, smtp_port) as smtp:
+            smtp.starttls()
+            smtp.login(smtp_email, smtp_password)
+            smtp.send_message(msg)
+    except (smtplib.SMTPException, OSError):
+        return False
+
+    return True

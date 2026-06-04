@@ -16,6 +16,12 @@ class ChildCreate(BaseModel):
     interests: Optional[str] = None
     avatar: Optional[str] = None
 
+class ChildUpdate(BaseModel):
+    name: Optional[str] = None
+    age: Optional[int] = None
+    interests: Optional[str] = None
+    avatar: Optional[str] = None
+
 class ChildResponse(BaseModel):
     id: int
     name: str
@@ -143,3 +149,40 @@ class QuizSubmitRequest(BaseModel):
     child_id: int
     quiz_id: int
     score: int
+
+class ParentSafetySettingCreate(BaseModel):
+    parent_id: int
+    child_id: int
+    daily_screen_time_limit_minutes: int = 120
+    child_safe_mode: str = "strict"
+    internet_monitoring_enabled: str = "yes"
+    ai_chat_monitoring_enabled: str = "yes"
+    blocked_categories: str = "adult,violence,gambling,drugs,stranger_chat"
+    allowed_categories: str = "education,creativity,bible,science,maths,reading"
+
+class SafetyClassifyRequest(BaseModel):
+    website_or_app: str
+    url: Optional[str] = None
+    summary: Optional[str] = None
+
+
+class LearningGoalCreate(BaseModel):
+    child_id: int
+    title: str
+    description: Optional[str] = None
+    category: str = "general"
+    target_stars: int = 50
+
+
+class LearningGoalUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    target_stars: Optional[int] = None
+    current_stars: Optional[int] = None
+    status: Optional[str] = None
+
+
+class LearningPathGenerateRequest(BaseModel):
+    child_id: int
+    focus_area: Optional[str] = None

@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.auth import decode_token
 from app.models import (
     Parent,
     Child,
@@ -22,7 +23,14 @@ from app.report_service import (
 router = APIRouter()
 
 @router.get("/{parent_id}/dashboard")
-def parent_dashboard(parent_id: int, db: Session = Depends(get_db)):
+def parent_dashboard(
+    parent_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(decode_token)
+):
+    if current_user.get("parent_id") != parent_id:
+        raise HTTPException(status_code=403, detail="Not allowed")
+
     children = db.query(Child).filter(Child.parent_id == parent_id).all()
 
     if not children:
@@ -58,7 +66,14 @@ def parent_dashboard(parent_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/{parent_id}/summary")
-def get_parent_summary(parent_id: int, db: Session = Depends(get_db)):
+def get_parent_summary(
+    parent_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(decode_token)
+):
+    if current_user.get("parent_id") != parent_id:
+        raise HTTPException(status_code=403, detail="Not allowed")
+
     children = db.query(Child).filter(Child.parent_id == parent_id).all()
 
     if not children:
@@ -113,7 +128,14 @@ def get_parent_summary(parent_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/reports/generate")
-def generate_parent_report(data: ReportRequest, db: Session = Depends(get_db)):
+def generate_parent_report(
+    data: ReportRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(decode_token)
+):
+    if current_user.get("parent_id") != data.parent_id:
+        raise HTTPException(status_code=403, detail="Not allowed")
+
     parent = db.query(Parent).filter(Parent.id == data.parent_id).first()
     child = db.query(Child).filter(Child.id == data.child_id).first()
 
@@ -212,11 +234,18 @@ def generate_parent_report(data: ReportRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/reports/download/{report_id}")
-def download_parent_report(report_id: int, db: Session = Depends(get_db)):
+def download_parent_report(
+    report_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(decode_token)
+):
     report = db.query(ParentReport).filter(ParentReport.id == report_id).first()
 
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
+
+    if current_user.get("parent_id") != report.parent_id:
+        raise HTTPException(status_code=403, detail="Not allowed")
 
     if not report.file_path:
         raise HTTPException(status_code=404, detail="Report file not found")
